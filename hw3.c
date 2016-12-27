@@ -31,16 +31,10 @@ http://stackoverflow.com/questions/7627723/how-to-create-a-md5-hash-of-a-string-
 **/
 char *str2md5(const char *str);
 char matches(const char *s1, const char *s2);
+void sendFound();
 
 /** Globalize rank and size */
 int rank, size;
-
-/** Send to root process that there was a match found of md5 hashes*/
-void sendFound()
-{
-    char found = 1;
-    MPI_Send(&found, 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-}
 
 int main(int argc, char *argv[])
 {
@@ -84,6 +78,12 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+/** Send to root process that there was a match found of md5 hashes*/
+void sendFound()
+{
+    char found = 1;
+    MPI_Send(&found, 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+}
 
 /** Checks if two strings matches of hash strings */
 char matches(const char *s1, const char *s2)
