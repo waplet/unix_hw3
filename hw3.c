@@ -8,10 +8,10 @@
 // static const char attack[33] = "ac627ab1ccbdb62ec96e702f07f6425b"; // 99
 // static const char attack[33] = "b706835de79a2b4e80506f582af3676a"; // 999
 // static const char attack[33] = "74b87337454200d4d33f80c4663dc5e5"; // aaaa
-// static const char attack[33] = "fa246d0262c3925617b0c72bb20eeb1d"; // 9999
+static const char attack[33] = "fa246d0262c3925617b0c72bb20eeb1d"; // 9999
 // static const char attack[33] = "cd64bab47ba44d4b4c2d63a45252a2eb"; // 9a9a
 // static const char attack[33] = "594f803b380a41396ed63dca39503542"; // aaaaa
-static const char attack[33] = "66d9978935150b34b9dc0741bc642be2"; // Dunte
+// static const char attack[33] = "66d9978935150b34b9dc0741bc642be2"; // Dunte
 static char found = 0;
 
 /** http://codereview.stackexchange.com/questions/38474/brute-force-algorithm-in-c **/
@@ -42,8 +42,12 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
+    
+    // printf("Size: %d\n", size);
+    // printf("Rank: %d\n", rank);
     // base process
     if (rank != 0 || size == 1) {
+
         // Making correct calculations possible
         int fakeSize = size - 1;
         int calcRank = rank;
@@ -63,7 +67,7 @@ int main(int argc, char *argv[])
     } else {
         char fnd;
         for (int other_rank = 1; other_rank < size; other_rank++) {
-            // printf("Waiting to receive...\n");
+            printf("Waiting to receive...\n");
             MPI_Recv(&fnd, 1, MPI_CHAR, other_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             // printf("Process %d sent found: %d\n", other_rank, (int) fnd);
             // printf("%d\n", (int)fnd);
@@ -132,13 +136,9 @@ void bForce(char * str, int index, int maxDepth, int from, int to)
 
         if (index == maxDepth -1) {
             // This is a legit word, so there needs to be md5 checksum check.
-            if (matches(str2md5(str), attack)) {
+            if (matches(str2md5(str), attack) == 1) {
                 printf("Match found for attack: %s (%s)\n", str, attack);
                 found = 1;
-
-                if (size != 1) {
-                    sendFound();
-                }
                 break;
             }
         } else {
@@ -150,12 +150,14 @@ void bForce(char * str, int index, int maxDepth, int from, int to)
 void prepForce(int maxLen, int from, int to)
 {
     // Inits memory for string
-    char * emptyString = malloc(maxLen + 1);
+    char emptyString[maxLen];
 
     for (int i = 1; i <= maxLen; ++i) {
-        memset(emptyString, 0, maxLen + 1);
+        memset(emptyString, 0, i + 1);
         bForce(emptyString, 0, i, from, to);
     }
 
-    free(emptyString);
+    if (found == 1 && size != 1) {
+        sendFound();
+    }
 }
