@@ -8,8 +8,10 @@
 // static const char attack[33] = "ac627ab1ccbdb62ec96e702f07f6425b"; // 99
 // static const char attack[33] = "b706835de79a2b4e80506f582af3676a"; // 999
 // static const char attack[33] = "74b87337454200d4d33f80c4663dc5e5"; // aaaa
-static const char attack[33] = "fa246d0262c3925617b0c72bb20eeb1d"; // 9999
-// static const char attack[33] = "66d9978935150b34b9dc0741bc642be2"; // Dunte
+// static const char attack[33] = "fa246d0262c3925617b0c72bb20eeb1d"; // 9999
+// static const char attack[33] = "cd64bab47ba44d4b4c2d63a45252a2eb"; // 9a9a
+// static const char attack[33] = "594f803b380a41396ed63dca39503542"; // aaaaa
+static const char attack[33] = "66d9978935150b34b9dc0741bc642be2"; // Dunte
 static char found = 0;
 
 /** http://codereview.stackexchange.com/questions/38474/brute-force-algorithm-in-c **/
@@ -63,7 +65,7 @@ int main(int argc, char *argv[])
         }
 
         // printf("From: %d; to: %d\n", from, to);
-        prepForce(6, from, to);
+        prepForce(5, from, to);
         // sendFound();
     } else {
         char fnd;
