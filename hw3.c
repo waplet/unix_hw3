@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-    
+
     // printf("Size: %d\n", size);
     // printf("Rank: %d\n", rank);
     // base process
@@ -125,7 +125,7 @@ void bForce(char * str, int index, int maxDepth, int from, int to)
         return;
     }
 
-    // Lets calculate from based on rank
+    // Lets reassigns default foreach positions if not first level
     if (index != 0) {
         from = 0;
         to = alphabetSize;
