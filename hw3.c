@@ -30,7 +30,7 @@ void prepForce(int maxLen, int from, int to);
 http://stackoverflow.com/questions/7627723/how-to-create-a-md5-hash-of-a-string-in-c
 **/
 char *str2md5(const char *str);
-int matches(const char *s1, const char *s2);
+char matches(const char *s1, const char *s2);
 
 /** Globalize rank and size */
 int rank, size;
@@ -66,7 +66,6 @@ int main(int argc, char *argv[])
 
         // printf("From: %d; to: %d\n", from, to);
         prepForce(5, from, to);
-        // sendFound();
     } else {
         char fnd;
         for (int other_rank = 1; other_rank < size; other_rank++) {
@@ -76,8 +75,6 @@ int main(int argc, char *argv[])
             // printf("%d\n", (int)fnd);
 
             if ((int) fnd == 1) {
-                // printf("Match found; Killing;\n");
-                // MPI_Abort(MPI_COMM_WORLD, MPI_SUCCESS);
                 MPI_Finalize();
                 break;
             }
@@ -89,7 +86,7 @@ int main(int argc, char *argv[])
 
 
 /** Checks if two strings matches of hash strings */
-int matches(const char *s1, const char *s2)
+char matches(const char *s1, const char *s2)
 {
     if (strncmp(s1, s2, 32) == 0) {
         return 1;
