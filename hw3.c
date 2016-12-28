@@ -8,11 +8,13 @@
 // static const char attack[33] = "ac627ab1ccbdb62ec96e702f07f6425b"; // 99
 // static const char attack[33] = "b706835de79a2b4e80506f582af3676a"; // 999
 // static const char attack[33] = "74b87337454200d4d33f80c4663dc5e5"; // aaaa
-static const char attack[33] = "fa246d0262c3925617b0c72bb20eeb1d"; // 9999
+// static const char attack[33] = "fa246d0262c3925617b0c72bb20eeb1d"; // 9999
 // static const char attack[33] = "cd64bab47ba44d4b4c2d63a45252a2eb"; // 9a9a
 // static const char attack[33] = "594f803b380a41396ed63dca39503542"; // aaaaa
-// static const char attack[33] = "66d9978935150b34b9dc0741bc642be2"; // Dunte
+static const char attack[33] = "66d9978935150b34b9dc0741bc642be2"; // Dunte
 static char found = 0;
+static unsigned char attackDigest[16];
+static unsigned char testDigest[16];
 
 /** http://codereview.stackexchange.com/questions/38474/brute-force-algorithm-in-c **/
 static const char alphabet[] =
@@ -29,8 +31,9 @@ void prepForce(int maxLen, int from, int to);
 /**
 http://stackoverflow.com/questions/7627723/how-to-create-a-md5-hash-of-a-string-in-c
 **/
-char *str2md5(const char *str);
-char matches(const char *s1, const char *s2);
+void str2md5(const char *str, unsigned char *digest);
+void hex2dig(const char *str, unsigned char *digest);
+char matches(const unsigned char *s1, const unsigned char *s2);
 void sendFound();
 
 /** Globalize rank and size */
@@ -39,6 +42,8 @@ int rank, size;
 int main(int argc, char *argv[])
 {
     int from, to;
+    // size = 1;
+    // rank = 0;
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -46,6 +51,10 @@ int main(int argc, char *argv[])
     // printf("Size: %d\n", size);
     // printf("Rank: %d\n", rank);
     // base process
+
+    // Calculate attack md5 to 16byte digest
+    hex2dig(attack, attackDigest);
+
     if (rank != 0 || size == 1) {
 
         // Making correct calculations possible
@@ -90,9 +99,9 @@ void sendFound()
 }
 
 /** Checks if two strings matches of hash strings */
-char matches(const char *s1, const char *s2)
+char matches(const unsigned char *s1, const unsigned char *s2)
 {
-    if (strncmp(s1, s2, 32) == 0) {
+    if (strncmp((char *)s1, (char *)s2, 16) == 0) {
         return 1;
     }
 
@@ -100,23 +109,32 @@ char matches(const char *s1, const char *s2)
 }
 
 /** Converts from chars* to md5 hex */
-char *str2md5(const char *str)
+void str2md5(const char *str, unsigned char *digest)
 {
-    int n;
     MD5_CTX c;
-    unsigned char digest[16];
-    char *out = (char *)malloc(33);
     MD5_Init(&c);
     MD5_Update(&c, str, strlen(str));
     MD5_Final(digest, &c);
-
-    for (n = 0; n < 16; ++n) {
-        snprintf(&(out[n*2]), 16*2, "%02x", (unsigned int)digest[n]);
-    }
-
-    return out;
 }
 
+void hex2dig(const char *str, unsigned char * digest)
+{
+    unsigned char t = 0;
+    char C[2];
+
+    for (int i = 0; i < 32; ++i) {
+        C[0] = str[i];
+        C[1] = '\0';
+        int num = strtol(C, NULL, 16);
+        if (i % 2 == 1) {
+            t += num;
+            digest[(i-1) / 2] = t;
+            t = 0;
+        } else {
+            t+= num * 16;
+        }
+    }
+}
 
 void bForce(char * str, int index, int maxDepth, int from, int to)
 {
@@ -136,7 +154,8 @@ void bForce(char * str, int index, int maxDepth, int from, int to)
 
         if (index == maxDepth -1) {
             // This is a legit word, so there needs to be md5 checksum check.
-            if (matches(str2md5(str), attack) == 1) {
+            str2md5(str, testDigest);
+            if (matches(testDigest, attackDigest) == 1) {
                 printf("Match found for attack: %s (%s)\n", str, attack);
                 found = 1;
                 break;
